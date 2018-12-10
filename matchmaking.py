@@ -1,24 +1,24 @@
 import config
-from config import Player
+from config import Player, Queue, Match
 import random
 
 
-queue = []
+qo = Queue()
+
+
 
 def print_queue(queue):
-    print(["{}".format(pl.mmr) for pl in queue])
+    print(["{}".format(pl.mmr) for pl in queue.master_queue])
 
 
-def populate_queue(num_players):
-    queue = []
+def populate_queue(queue, num_players):
+    queue.master_queue = []
     for i in range(num_players):
-        p = Player(name="p{}".format(i), mmr=random.randint(config.MMR_MIN, config.MMR_MAX))
-        queue = queue_player(p)
-
-    print_queue(queue)
+        p = Player(name="P{}".format(i), mmr=random.randint(config.MMR_MIN, config.MMR_MAX))
+        queue.master_queue = queue_player(queue, p)
 
 
-def queue_player(player):
+def queue_player(queue, player):
     def binary_insert(q, mmr):
         min_ind = 0
         max_ind = len(q) - 1
@@ -33,20 +33,93 @@ def queue_player(player):
             else:
                 return i+1
 
-    queue_index = binary_insert(queue, player.mmr)
-    queue.insert(queue_index, player)
+    queue_index = binary_insert(queue.master_queue, player.mmr)
+    queue.master_queue.insert(queue_index, player)
+    queue.time_queue.append(player)
 
-    return queue
+    return queue.master_queue
 
 
-populate_queue(16)
+def make_match(queue, player):
+
+    matched_players = [player]
+    k = queue.master_queue.index(player)
+    i = 1
+    while True:
+
+        mmr_good_1 = True
+        if k - i >= 0:
+            p1 = queue.master_queue[k-i]
+            mmr_good_1 = abs(p1.mmr - player.mmr) <= config.MMMR_QUEUE_THRESH
+            if mmr_good_1 and not p1.being_matched:
+                p1.being_matched = True
+                matched_players.append(p1)
+        else:
+            break
+
+        if len(matched_players) == config.TEAM_SIZE*2:
+            break
+
+        mmr_good_2 = True
+        if k + i < len(queue):
+            p2 = queue.master_queue[k + i]
+            mmr_good_2 = abs(p2.mmr - player.mmr) <= config.MMMR_QUEUE_THRESH
+            if mmr_good_2 and not p2.being_matched:
+                p2.being_matched = True
+                matched_players.append(p2)
+        else:
+            break
+
+        if len(matched_players) == config.TEAM_SIZE*2 or (not mmr_good_1 and not mmr_good_2):
+            break
+
+        i += 1
+
+    if len(matched_players) == config.TEAM_SIZE*2:
+        for pl in matched_players:
+            queue.master_queue.remove(pl)
+            queue.time_queue.remove(pl)
+        return Match(matched_players)
+
+    return None
+
+
+
+def search_matchmaking(queue):
+
+    for p in queue.time_queue:
+
+        m = make_match(queue, p)
+        if m is not None:
+            return m
+
+    return None
+
+
+def make_all_matches(queue):
+    matches = []
+    m = search_matchmaking(queue)
+    while m:
+        m = search_matchmaking(queue)
+        matches.append(m)
+
+    return matches
+
+
+populate_queue(qo, 100)
 
 player = Player("New Player", 600)
 
-queue_player(player)
+queue_player(qo, player)
 
-print_queue(queue)
+ms = make_all_matches(qo)
 
+print("Made {} matches".format(len(ms)))
+for m in ms:
+    print(m)
+
+
+print(qo)
 
 
 
