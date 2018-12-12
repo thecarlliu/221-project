@@ -1,8 +1,8 @@
 
-TEAM_SIZE = 3
+TEAM_SIZE = 5
 MMR_MIN = 0
 MMR_MAX = 1000
-MMMR_QUEUE_THRESH = 300
+MMMR_QUEUE_THRESH = 50
 
 
 class Player(object):
@@ -44,4 +44,4 @@ class Match(object):
         self.team_2 = players[self.team_size:]
 
     def __repr__(self):
-        return "New Match\nTeam 1: {}\nTeam 2: {}".format(self.team_1, self.team_2)
+        return "New {} Player Match\nTeam 1: {}\nTeam 2: {}".format(self.team_size*2, self.team_1, self.team_2)
