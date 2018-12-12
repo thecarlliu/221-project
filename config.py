@@ -1,5 +1,5 @@
 
-TEAM_SIZE = 5
+TEAM_SIZE = 3
 MMR_MIN = 0
 MMR_MAX = 1000
 MMMR_QUEUE_THRESH = 50
@@ -12,6 +12,7 @@ class Player(object):
         self.mmr = mmr
         self.role = ""
         self.being_matched = False
+        self.time_in_queue = 0
 
     def __repr__(self):
         return "{} ({})".format(self.name, self.mmr)

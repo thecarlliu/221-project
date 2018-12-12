@@ -3,14 +3,6 @@ from config import Player, Queue, Match
 import random
 
 
-
-
-
-
-def print_queue(queue):
-    print(["{}".format(pl.mmr) for pl in queue.master_queue])
-
-
 def populate_queue(queue, num_players):
     queue.master_queue = []
     for i in range(num_players):
@@ -103,14 +95,21 @@ def make_all_matches(queue):
     while m is not None:
         matches.append(m)
         m = search_matchmaking(queue)
+
+    # Enable tracking time in queue
+    # for p in queue.time_queue:
+    #     p.time_in_queue += 1
+
     return matches
 
 
-
+# Runs simulation of matchmaking process with random player joins
 def simulate_matchmaking(time=10000):
 
     match_counter = 0
     player_counter = 10
+
+    make_matches_every = 10
 
     qo = Queue()
 
@@ -118,21 +117,24 @@ def simulate_matchmaking(time=10000):
 
     for i in range(time):
         if random.randint(0, 10) == 0:
-            mmr = random.randint(0, config.MMR_MAX)
+            mmr = random.randint(config.MMR_MIN, config.MMR_MAX)
             player = Player("P{}".format(i), mmr)
             queue_player(qo, player)
             player_counter += 1
             #print("New Player added to queue: {}".format(player))
 
-        ms = make_all_matches(qo)
-        if len(ms) != 0:
-            for m in ms:
-                match_counter += 1
-                print("\n{}".format(m))
+        if i % make_matches_every == 0:
+            ms = make_all_matches(qo)
+            if len(ms) != 0:
+                for m in ms:
+                    match_counter += 1
+                    print("\n{}".format(m))
 
     print("\n\nMatchmaking Simulations Complete")
     print("Players Queued: {}".format(player_counter))
     print("Matches Created: {}".format(match_counter))
+
+    print(qo.time_queue)
 
 simulate_matchmaking()
 
