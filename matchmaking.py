@@ -2,14 +2,14 @@ import config
 from config import Player, Queue, Match
 import random
 
-
+"""Populates queue with # players defined by parameter. Player is given a name based on the # player that was created and an MMR that is randomly generated between the defined MIN and MAX"""
 def populate_queue(queue, num_players):
     queue.master_queue = []
     for i in range(num_players):
         p = Player(name="P{}".format(i), mmr=random.randint(config.MMR_MIN, config.MMR_MAX))
         queue.master_queue = queue_player(queue, p)
 
-
+"""Inserts player into queue via binary insertion sort"""
 def queue_player(queue, player):
     def binary_insert(q, mmr):
         min_ind = 0
@@ -31,7 +31,7 @@ def queue_player(queue, player):
 
     return queue.master_queue
 
-
+"""Part of the matchmaking algorithm that tries to find enough players within the MMR threshold of the selected player's MMR to fill two teams. If enough players are found, they are distributed into teams and placed into a match."""
 def make_match(queue, player):
 
     matched_players = [player]
@@ -78,7 +78,7 @@ def make_match(queue, player):
             p.being_matched = False
         return None
 
-
+"""Iterates over players in the Time Queue"""
 def search_matchmaking(queue):
     for p in queue.time_queue:
 
@@ -88,7 +88,7 @@ def search_matchmaking(queue):
 
     return None
 
-
+"""Performs matchmaking on queue"""
 def make_all_matches(queue):
     matches = []
     m = search_matchmaking(queue)
@@ -102,7 +102,7 @@ def make_all_matches(queue):
 
     return matches
 
-
+"""Initializes all counters necessary for simulation results. Randomly adds a player to the queue periodically, makes matches every 10th iteration of the simulation. Simulates matchmaking algorithm for # iterations defined by time. Prints results."""
 # Runs simulation of matchmaking process with random player joins
 def simulate_matchmaking(time=10000):
 
